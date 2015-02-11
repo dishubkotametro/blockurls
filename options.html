@@ -1,0 +1,64 @@
+<html>
+  <head>
+    <title>Block urls</title>
+    <style>
+body {
+  font-family: 'Lucida Grande', sans-serif;
+  font-size: 75%;
+  color: rgb(48, 57, 66);
+  cursor: default;
+  margin-left: 80px;
+  width: 600px;
+}
+button {
+  -webkit-padding-end: 10px;
+  -webkit-padding-start: 10px;
+  -webkit-appearance: none;
+  -webkit-user-select: none;
+  background-image: -webkit-linear-gradient(#ededed, #ededed 38%, #dedede);
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 2px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08), inset 0 1px 2px rgba(255, 255, 255, 0.75);
+  color: #444;
+  font: inherit;
+  margin: 0 1px 0 0;
+  outline: none;
+  text-shadow: 0 1px 0 rgb(240, 240, 240);
+}
+button:hover {
+  background-image: -webkit-linear-gradient(#f0f0f0, #f0f0f0 38%, #e0e0e0);
+  border-color: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.95);
+  color: black;
+}
+button:active {
+  background-image: -webkit-linear-gradient(#e7e7e7, #e7e7e7 38%, #d7d7d7);
+  box-shadow: none;
+  text-shadow: none;
+}
+img {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+}
+textarea {
+  width: 100%;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+    </style>
+  </head>
+  <body>
+    <img src="block48.png">
+    <h1>Block urls</h1>
+
+    <p>Urls that start with one of the strings listed below are blocked. You can unblock urls by starting a line with a # character. </p>
+
+    <label>
+      <b>Block urls</b><br>
+      <textarea id="blocked_urls" rows="30" cols="50"></textarea>
+    </label><br>
+    <button id="save">Save</button>
+    <script src="plugin.js"></script>
+  </body>
+</html>
