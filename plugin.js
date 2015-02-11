@@ -4,10 +4,7 @@ function set_blocked_urls_textarea_value(blocked_urls) {
 
 function load_options() {
   chrome.storage.sync.get({
-    blocked_urls: [
-      'https://facebook.com/',
-      'https://twitter.com/'
-    ]
+    blocked_urls: []
   }, function(options) {
     set_blocked_urls_textarea_value(options.blocked_urls);
   });
