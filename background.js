@@ -66,16 +66,18 @@ function tab_reload() {
   });
 }
 
-chrome.contextMenus.create({title: "Block domain", onclick: function(info, tab) {
+function url_domain(url) {
   var parser = document.createElement('a');
-  parser.href = tab.url;
-  set_blocked_url(parser.protocol + '//' + parser.hostname + '/', true, tab_reload);
+  parser.href = url;
+  return parser.protocol + '//' + parser.hostname + '/';
+}
+
+chrome.contextMenus.create({title: "Block domain", onclick: function(info, tab) {
+  set_blocked_url(url_domain(tab.url), true, tab_reload);
 }});
 
 chrome.contextMenus.create({title: "Unblock domain", onclick: function(info, tab) {
-  var parser = document.createElement('a');
-  parser.href = tab.url;
-  set_blocked_url(parser.protocol + '//' + parser.hostname + '/', false, tab_reload);
+  set_blocked_url(url_domain(tab.url), false, tab_reload);
 }});
 
 // Add context menu for global enable/disable
