@@ -43,8 +43,10 @@ img {
 }
 textarea {
   width: 100%;
-  margin-top: 1em;
-  margin-bottom: 1em;
+}
+label, textarea, input, button {
+  margin-top: .5em;
+  margin-bottom: .5em;
 }
     </style>
   </head>
@@ -58,7 +60,14 @@ textarea {
       <b>Block urls</b><br>
       <textarea id="blocked_urls" rows="30" cols="50"></textarea>
     </label><br>
+
+    <label>
+      <input id="enabled" type="checkbox">Enable blocking
+    </label><br>
+
     <button id="save">Save</button>
-    <script src="plugin.js"></script>
+
+    <script src="shared.js"></script>
+    <script src="options.js"></script>
   </body>
 </html>

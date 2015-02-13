@@ -1,35 +1,38 @@
-// The actual urls to block
+var options = {
+  // The actual urls to block
+  blocked_urls: [],
+  // Extension enabled flag
+  enabled: true
+};
 
-var blocked_urls = [];
-
-// Storage helpers
-
-function load_blocked_urls(callback) {
-  chrome.storage.sync.get({
-    blocked_urls: []
-  }, function(options) {
-    callback(options.blocked_urls);
-  });  
-}
-
-function add_blocked_url(url, callback) {
-  load_blocked_urls(function(blocked_urls) {
-    if(blocked_urls.indexOf(url) == -1) {
-      blocked_urls.push(url);
-      var options = {blocked_urls: blocked_urls};
-      chrome.storage.sync.set(options, function() {
-        // Also update settings view
-        chrome.runtime.sendMessage(options);
-        callback();
-      });
+function set_blocked_url(url, add_or_remove, callback) {
+  load_options(function(options) {
+    var index = options.blocked_urls.indexOf(url);
+    if(add_or_remove) {
+      if(index === -1) {
+        options.blocked_urls.push(url);
+        options.enabled = true;
+        store_options(options, callback);
+      }
+    } else {
+      if(index >= 0) {
+        options.blocked_urls.splice(index, 1);
+        store_options(options, callback);
+      }
     }
   })
 }
 
+function set_enabled(enabled, callback) {
+  options.enabled = enabled;
+  store_options(options, callback);
+}
+
 // Load config from storage
 
-load_blocked_urls(function(loaded_blocked_urls) {
-  blocked_urls = loaded_blocked_urls;
+load_options(function(loaded_options) {
+  options = loaded_options;
+  update_options(options);
 });
 
 // Use console on the background pageipo01
@@ -39,35 +42,58 @@ var console = chrome.extension.getBackgroundPage().console;
 // Block urls before navigation
 
 chrome.webRequest.onBeforeRequest.addListener(function(details) {
-  var url = details.url;
-  for(var i = 0; i < blocked_urls.length; i++) {
-    var block = blocked_urls[i];
-    if(details.url.startsWith(block)) {
-      console.log("blocked: " + url)
-      return {cancel: true};
+  if(options.enabled) {
+    var url = details.url;
+    for(var i = 0; i < options.blocked_urls.length; i++) {
+      var block = options.blocked_urls[i];
+      if(details.url.startsWith(block)) {
+        return {cancel: true};
+      }
     }
   }
 }, {urls: ["*://*/*"]}, ["blocking"]);
 
 // Add context menu to block pages
 
-var block_menu = chrome.contextMenus.create({title: "Block urls from this domain", onclick: function(info, tab) {
+function tab_reload() {
+  chrome.tabs.executeScript({
+    code: 'document.location.reload();'
+  }, function() {
+    if (chrome.runtime.lastError) {
+      // Ignore permission errors
+      console.log(chrome.runtime.lastError.message);
+    }
+  });
+}
+
+chrome.contextMenus.create({title: "Block domain", onclick: function(info, tab) {
   var parser = document.createElement('a');
   parser.href = tab.url;
-  add_blocked_url(parser.protocol + '//' + parser.hostname + '/', function() {
-    chrome.tabs.executeScript({
-      code: 'document.location.reload();'
-    });
-  });
+  set_blocked_url(parser.protocol + '//' + parser.hostname + '/', true, tab_reload);
 }});
 
-// Receive changes from options
+chrome.contextMenus.create({title: "Unblock domain", onclick: function(info, tab) {
+  var parser = document.createElement('a');
+  parser.href = tab.url;
+  set_blocked_url(parser.protocol + '//' + parser.hostname + '/', false, tab_reload);
+}});
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  if(request.blocked_urls) {
-    blocked_urls = request.blocked_urls;
-    sendResponse('blocked_urls updated');
+// Add context menu for global enable/disable
+
+var enabled_menu = chrome.contextMenus.create({title: "Enabled", type: 'checkbox', checked: options.enabled, onclick: function(info, tab) {
+    set_enabled(! options.enabled, tab_reload);
   }
+});
+
+// Receive changes from options page
+
+function update_options(updated_options) {
+  options = updated_options;
+  chrome.contextMenus.update(enabled_menu, {checked: options.enabled});
+}
+
+chrome.runtime.onMessage.addListener(function(received_options, sender, sendResponse) {
+  update_options(received_options);
 });
 
 // Add startsWith function to String prototype
